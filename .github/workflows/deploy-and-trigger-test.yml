@@ -39,6 +39,6 @@ jobs:
               "client_payload": {
                 "env": "qa",
                 "tag": "@smoke",
-                "base_url": "https://www.saucedemo.com"
+                "base_url": "https://www.saucedemo.com1"
               }
             }'
