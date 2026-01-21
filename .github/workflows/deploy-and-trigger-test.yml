@@ -2,7 +2,7 @@ name: Deploy & Trigger E2E Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
   workflow_dispatch:
 
@@ -18,11 +18,26 @@ jobs:
         uses: actions/checkout@v4
 
       # -----------------------
-      # Giả lập deploy Phase
+      # Decide ENV based on branch
       # -----------------------
-      - name: Deploy application to QA
+      - name: Decide environment
         run: |
-          echo "🚀 Deploy application to QA environment"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "ENV=qa" >> $GITHUB_ENV
+            echo "TAG=@smoke" >> $GITHUB_ENV
+            echo "BASE_URL=https://www.saucedemo.com" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "ENV=dev" >> $GITHUB_ENV
+            echo "TAG=@smoke" >> $GITHUB_ENV
+            echo "BASE_URL=https://www.saucedemo-dev.com" >> $GITHUB_ENV
+          fi
+
+      # -----------------------
+      # Giả lập deploy
+      # -----------------------
+      - name: Deploy application
+        run: |
+          echo "🚀 Deploy application to $ENV environment"
           echo "Deploy success!"
 
       # -----------------------
@@ -34,11 +49,11 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.TEST_REPO_TOKEN }}" \
             https://api.github.com/repos/thinhnh96/demoapp/dispatches \
-            -d '{
-              "event_type": "run-e2e",
-              "client_payload": {
-                "env": "qa",
-                "tag": "@smoke",
-                "base_url": "https://www.saucedemo.com1"
+            -d "{
+              \"event_type\": \"run-e2e\",
+              \"client_payload\": {
+                \"env\": \"$ENV\",
+                \"tag\": \"$TAG\",
+                \"base_url\": \"$BASE_URL\"
               }
-            }'
+            }"
