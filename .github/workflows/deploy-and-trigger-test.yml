@@ -18,8 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       # -----------------------
-      # Fake deploy step
-      # (thực tế thay bằng helm / terraform / ansible / ssh / kubectl)
+      # Giả lập deploy Phase
       # -----------------------
       - name: Deploy application to QA
         run: |
